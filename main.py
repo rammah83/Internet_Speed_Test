@@ -1,5 +1,4 @@
 """
-
 Module for running a speed test using Speedtest.net and printing the results to
 the console.
 
@@ -38,7 +37,7 @@ def test_internet_speed():
         # Get current timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"Timestamp: {timestamp}")
-        st = speedtest.Speedtest(source_address="www.youtube.com")
+        st = speedtest.Speedtest()
 
         print("Fetching the best server based on ping...")
         st.get_best_server()
