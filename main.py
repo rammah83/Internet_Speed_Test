@@ -12,9 +12,11 @@ To install library: pip install speedtest-cli
 
 import sys
 from datetime import datetime
-from tqdm import tqdm
+from statistics import mean, stdev
 
 import speedtest
+
+NUM_TESTS = 2
 
 
 def test_internet_speed():
@@ -28,7 +30,6 @@ def test_internet_speed():
         0: Test completed successfully
         1: Test failed due to errors
     """
-    num_tests = 5
     pings = []
     download_speeds = []
     upload_speeds = []
@@ -42,24 +43,15 @@ def test_internet_speed():
         print("Fetching the best server based on ping...")
         st.get_best_server()
 
-        print("Performing speed test...")
-
-        for i in tqdm(range(num_tests)):
-            tqdm.write(f"Running test {i+1} of {num_tests}...", nolock=True)
-
-            # Performing ping test...
+        for _ in range(NUM_TESTS):
+            # Perform the speed test
             ping = st.results.ping
-
-            # Performing download test...
             download_speed = st.download()
-
-            # Performing upload test...
             upload_speed = st.upload()
 
             # Convert speeds from bits per second to megabits per second
             download_speed_mbps = download_speed / 1_000_000
             upload_speed_mbps = upload_speed / 1_000_000
-
 
             pings.append(ping)
             download_speeds.append(download_speed_mbps)
@@ -82,25 +74,23 @@ def test_internet_speed():
         raise
     else:
         # Calculate mean and std dev from the results
-        mean_ping = sum(pings) / num_tests
-        std_ping = (sum((x - mean_ping) ** 2 for x in pings) / (num_tests - 1)) ** 0.5
+        mean_ping = mean(pings)
+        std_ping = stdev(pings)
 
-        mean_download = sum(download_speeds) / num_tests
-        std_download = (
-            sum((x - mean_download) ** 2 for x in download_speeds) / (num_tests - 1)
-        ) ** 0.5
+        mean_download = mean(download_speeds)
+        std_download = stdev(download_speeds)
 
-        mean_upload = sum(upload_speeds) / num_tests
-        std_upload = (
-            sum((x - mean_upload) ** 2 for x in upload_speeds) / (num_tests - 1)
-        ) ** 0.5
+        mean_upload = mean(upload_speeds)
+        std_upload = stdev(upload_speeds)
 
-        print(f"\n===== Internet Speed Test Results of {num_tests} =====")
+        print(f"\n===== Internet Speed Test Results of {NUM_TESTS} =====")
         print(f"{ '<':<20}{ 'Mean':>10}{ 'Std Dev':>20}")
         print("-" * 60)
-        print(f"{ 'Ping (ms)':<20}{ mean_ping:>10.2f}{ std_ping:>20.2f}")
-        print(f"{ 'Download Speed (Mbps)':<20}{ mean_download:>10.2f}{ std_download:>20.2f}")
-        print(f"{ 'Upload Speed (Mbps)':<20}{ mean_upload:>10.2f}{ std_upload:>20.2f}")
+        print(f"{ 'Ping (ms)':<20}{ mean_ping:>10.1f}{ std_ping:>20.2f}")
+        print(
+            f"{ 'Download Speed (Mbps)':<20}{ mean_download:>10.1f}{ std_download:>20.2f}"
+        )
+        print(f"{ 'Upload Speed (Mbps)':<20}{ mean_upload:>10.1f}{ std_upload:>20.2f}")
         print("==================Test Completed=====================")
 
 
